@@ -1,14 +1,38 @@
-# Cribsheets Intro to SQL
+# Cribsheets: Intro to SQL
 
 At some point, you'll be working with data stored in a relational format.
-Likely, this data will be accessed via SQL. _You_ may not be accessing it, as
-there are plenty of Object Relational Mapping (ORM) libraries to facilitate this
-access in whatever language, but it is incredibly useful to understand what's
-going on under the surface.
+Likely, this data will be accessed via SQL (Structured Query Language). _You_
+may not be accessing it, as there are plenty of Object Relational Mapping (ORM)
+libraries to facilitate this access in whatever language, but it is incredibly
+useful to understand what's going on under the surface.
 
 To that effect, we present this short introduction to SQL, a small data set, and
-a framework to practice some basic skills. To work on this, you'll need to
-install SQLite:
+a framework to practice some basic skills.
+
+# About SQL
+
+The Structured Query Language (SQL) is a language for interacting with
+relationally structured data. The data in question is _structured_ into a
+well-defined _schema_ (description) when the database is defined. Each datum can
+_relate_ to other data in the database via relationships either defined in the
+schema, or as a result of a query or update.
+
+SQL provides tools for interacting with that data. Using SQL, you can select and
+search for information, update information that already exists, insert new data
+into the database, and delete data.
+
+SQL has two fundamental structures: a single row of data or  _record_, and a list of
+records or _table_. Most interactions with SQL will return results in a table
+format.
+
+## Getting Started
+
+To keep the overhead for these exercises as small as possible, we'll be using
+SQLite as our database engine. SQLite is a small, fast and relational SQL
+database (db) engine. It's great for prototyping, embedded applications, and
+doesn't require additional services to run on your machine to use.
+
+To install SQLite:
 
 ~~~bash
 # mac os x
@@ -21,9 +45,13 @@ install SQLite:
 > sudo yum install sqlite
 ~~~
 
-SQLite is a small, fast and relational SQL database (db) engine. It's great
-for prototyping, embedded applications, and doesn't require additional services
-to run on your machine to use. We picked it for our exercises for these reasons.
+To check whether or not your installation was successful, you can ask SQLite for
+its version:
+
+~~~bash
+> sqlite3 --version
+3.24.0 2018-06-04 14:10:15 95fbac39baaab1c3a84fdfc82ccb7f42398b2e92f18a2a57bce1d4a713cbaapl
+~~~
 
 ## Getting Around
 
@@ -73,11 +101,14 @@ sqlite> .restore myname dbfile.db
 Finally, if you want to take a snapshot of the database as it currently exists
 in memory, you'd (predictably) use `.save`:
 
-~~~sqlite
+~~~bash
 sqlite> .save dbfile-snapshot.db
 ~~~
 
-## SQL Basics
+
+
+
+# SQL Basics
 
 
 
@@ -86,6 +117,6 @@ sqlite> .save dbfile-snapshot.db
 
 It's best to learn how to do things from the terminal emulator, as _every system
 you're likely to use will have a terminal or console_. However, if you've become
-accustomed to clicking on things, or if you're scared of the command line, you
+accustomed to clicking on things, or if you're not comfortable of the command line, you
 may want a more visual tool. If so, check out [DB Browser for
 SQLite](https://sqlitebrowser.org/).
