@@ -19,18 +19,22 @@ schema, or as a result of a query or update.
 
 SQL provides tools for interacting with that data. Using SQL, you can select and
 search for information, update information that already exists, insert new data
-into the database, and delete data.
+into the database, and delete data. There's quite a bit to SQL, and we're just
+going to scratch the surface. Hopefully that will be enough to get you
+interested enough to study further.
 
 SQL has two fundamental structures: a single row of data or  _record_, and a list of
-records or _table_. Most interactions with SQL will return results in a table
+records or _table_. Most interactions with SQL will return results in a tabular
 format.
 
-## Getting Started
+# SQLite
 
 To keep the overhead for these exercises as small as possible, we'll be using
 SQLite as our database engine. SQLite is a small, fast and relational SQL
 database (db) engine. It's great for prototyping, embedded applications, and
 doesn't require additional services to run on your machine to use.
+
+## Setting Up
 
 To install SQLite:
 
@@ -105,13 +109,110 @@ in memory, you'd (predictably) use `.save`:
 sqlite> .save dbfile-snapshot.db
 ~~~
 
-
-
-
 # SQL Basics
 
+## First Steps
+
+Let's start with hello. Open sqlite3 and type in `select 'hello!';`:
+
+~~~bash
+> sqlite3
+SQLite version [stuff]
+Enter ".help" for usage hints.
+Connected to a transient in-memory database.
+Use ".open FILENAME" to reopen on a persistent database.
+sqlite> select 'hello!';
+hello!
+~~~
+
+You've executed your first SQL statement! Note the parts: we begin with a
+`select`, since we're selecting values. We've told the engine what to
+select---in this case, the string 'hello!', surrounded by single quotes (`'`).
+The statement is terminated with a semicolon (`;`). The semicolon is important,
+as SQL can span multiple lines quite happily, and the engine needs to know when
+to start processing.
+
+Try a few more things:
+
+* add: `select 2 + 5;`
+* subtract: `select 5 - 2;`
+* multiply: `select 6 * 8;`
+* divide: `select 8 / 2;`
+* integer division: `select 9 / 2;`
+* floating point division: `select 9 / 2.0;`
+* modulo: `select 9 % 2';`
+* oops? `select '2 + 5';`
+
+SQL includes some mathematical operators, and is aware of the difference between
+a integer and a floating point number. Note that every SQL statement ends with a
+semicolon, and that the single quote (`'`) always denotes a string literal.
+
+SQL also includes logical operators. Let's try some:
+
+* test for equality (yes is 1): `select 2 = 2;`
+* test for equality (no is 0): `select 2 = 3;`
+* test less-than or equal: `select 2 <= 3;`
+* test greater-than: `select 2 > 3;`
+* test for inequality: `select 12 <> 13;`
+
+As you can see, SQL represents a 'false' as 0, and a 'true' as 1. At the moment,
+we're simply using these operators with a `select` statement to get some
+familiarity with how SQL works (and to practice adding a semicolon to
+_everything_).
+
+We can also use logical operators to chain together tests:
+
+* logical and: `select (1 < 3) and (3 < 5);`
+* logical not: `select not (3<>3);`
+* between values: `select 3 between 1 and 5;`
+* `select 3 between 4 and 5;`
+* found in list/set: `select 3 in (1,2,3,4,5);`
+* `select '3' in (1,2,3,4,5);`
+* with strings: `select 'Monster' in ('Monster', 'Mina', 'Fluffy', 'Spot');`
+
+Finally, we can do some matching:
+
+* `select 'Monster' like 'm%';`
+* `select 'Fluffy' like 'm%';`
+
+These are the tools in SQL we'll have available to make decisions and
+calculations about data stored in the db, but by themselves, they're not very
+exciting. So let's load up some data and query.
+
+## Selecting Data
+
+Selecting data retrieves it from the database using the `select` statement. In
+general, `select` will be the statement you use the most, so let's start with
+that one.
+
+A `select` statement (or query) has the following general format:
+
+`select <fields,data> from <somewhere> where <some condition> <options>;`
 
 
+
+
+* All employees
+* All employees, with limits (fields, rows)
+* Ordered by Hire Date
+* Conditionals - more than five years since hire
+* 
+
+
+
+### On Case
+
+Probs should say something about select vs SELECT
+
+
+
+
+
+
+
+# Where to Go From Here?
+
+Next steps for the SQL student and a list of resources.
 
 ## Cheating: DB Browser for SQLite
 
