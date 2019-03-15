@@ -189,6 +189,49 @@ A `select` statement (or query) has the following general format:
 
 `select <fields,data> from <somewhere> where <some condition> <options>;`
 
+We can think of this as being broken up into clauses:
+
+* select clause: `select <something>`
+* from clause: `from <somewhere>`
+* where clause: `where <some condition(s) is (are) true>`
+* options clauses
+* don't forget the semicolon!
+
+The select clause is required (and the semicolon) however everything else is
+optional.
+
+The select clause tells the db what we want to receive from the data we're
+querying. This can include literals (3, 'Monster'), the results of operations
+(5 / 2.0), but more commonly it is a list of fields in the data we're querying.
+If we were querying a list of employees, we might only want the name returned,
+as in `select first_name, last_name from employees;`
+
+The from clause tells the db where to look. This can be a single table, or it
+can be more than one table joined in some fashion into a temporary structure.
+The from clause can get complex. We'll start with a single table and move on
+from there.
+
+The where clause sets conditions on the data we care about, using the logical
+statements we played with above. For example: 
+
+`select name, color from pets where color='black' and species='cat';` or<br/>
+`select name, calories, price from menu where calories < 800 and price < 15.00;`
+
+Finally, the options clause can contain a variety of constraints and modifiers
+to fiddle with the data before it's presented to us. Two examples are `limit`,
+which tells the db the maximum number of records to return, and `order by`,
+which can sort the data before we see it.
+
+Got it? Okay, let's get cracking.
+
+### Load 'employees.db'
+
+From the project directory (where this README is), run:
+
+~~~bash
+> sqlite3 employees.db
+~~~
+
 
 
 
