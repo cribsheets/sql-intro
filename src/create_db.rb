@@ -38,7 +38,7 @@ db_file  = File.join(File.dirname(__FILE__), '..', 'employees.db')
 # read in the csv data, and clean
 employees = CSV.read(csv_file).map { |r| Hash[field_names.zip(r)] }
 employees.each do |e|
-  lname, fname = e[:name].split(', ')
+  lname, fname = e[:name].split(/\s*,\s*/)
   e[:first_name] = fname
   e[:last_name] = lname
   e.each { |k,v| e[k] = v.strip if v }

@@ -7,7 +7,9 @@ libraries to facilitate this access in whatever language, but it is incredibly
 useful to understand what's going on under the surface.
 
 To that effect, we present this short introduction to SQL, a small data set, and
-a framework to practice some basic skills.
+a framework to practice some basic skills. We won't even begin to pretend this
+is a comprehensive guide, but it exists to get your toes wet in the SQL world,
+and to give you a sense of how it works and what it's used for.
 
 # About SQL
 
@@ -26,6 +28,11 @@ interested enough to study further.
 SQL has two fundamental structures: a single row of data or  _record_, and a list of
 records or _table_. Most interactions with SQL will return results in a tabular
 format.
+
+If you've used a spreadsheet program, there are surface similarities between
+SQL's table/record structure and a spreadsheet's sheet/row structure. This is
+okay to use as a model for initial understanding, but don't get _too_ attached
+to that model.
 
 # SQLite
 
@@ -57,7 +64,7 @@ its version:
 3.24.0 2018-06-04 14:10:15 95fbac39baaab1c3a84fdfc82ccb7f42398b2e92f18a2a57bce1d4a713cbaapl
 ~~~
 
-## Getting Around
+## Getting Around in SQLite
 
 Before we get into SQL proper, let's talk for a second about the db program
 itself. You'll need to be able to start it, load a db, execute commands, and
@@ -226,11 +233,229 @@ Got it? Okay, let's get cracking.
 
 ### Load 'employees.db'
 
-From the project directory (where this README is), run:
+We've provided a database with some employee data, courtesy of
+Kaggle's [Human Resources Data
+Set](https://www.kaggle.com/rhuebner/human-resources-data-set/home). Let's
+load that into SQLite. From the project directory (where this README is), run:
 
 ~~~bash
 > sqlite3 employees.db
 ~~~
+
+Now let's poke around. The first thing you'll want to do when opening a new data
+set is to check out its structure. Remember that `.help` exists, and let's see
+what databases are present.
+
+In the SQLite CLI, type `.databases`. You should see a result like this:
+
+~~~bash
+sqlite> .databases
+main: /path/to/project/employees.db
+~~~
+
+Now we can look at the available tables, using `.tables`:
+
+~~~bash
+sqlite> .tables
+employees
+~~~
+
+We can take a look at the structure of the `employees` table using `.schema`:
+
+~~~
+sqlite> .schema employees
+CREATE TABLE employees (
+    name TEXT, first_name TEXT, last_name TEXT, empno TEXT, state TEXT,
+    zip TEXT, dob DATE, age INTEGER, sex TEXT, marital_status TEXT,
+    citizenship TEXT, hire_date DATE, termination_date DATE, term_reason TEXT, status TEXT,
+    department TEXT, position TEXT, hourly_rate FLOAT, manager TEXT, source TEXT,
+    performance_score TEXT
+  );
+~~~
+
+This is the `CREATE` statement used to build the table. As before, a _table_ is
+one of the two fundamental structures in SQL, along with a _record_. A record is
+composed of a number of _fields_ or _columns_ (used interchangeably).
+Each field has a _datatype_.
+
+In this table, most columns are TEXT, but a few are DATEs, with
+an INTEGER and FLOAT thrown in for variety. Now that we know what fields are
+available, it would be nice to know how many records are in the table.
+
+We do this with `select` and `count()`:
+
+~~~
+sqlite> select count() from employees;
+count()
+301
+~~~
+
+Here we're using `select`, and asking SQL to count the records in
+the employees table. Since we didn't use a `where` clause, it will count
+all of the rows. By adding a where clause, we can get more specific counts:
+
+~~~
+sqlite> select count() from employees where state = 'CT';
+count()
+6
+sqlite> select count() from employees where state = 'TX';
+count()
+3
+~~~
+
+We could do this for every state, but it's also possible to see everything
+at once. The `count()` function can also be combined with the `group by`
+options to get a count by state for all states:
+
+~~~
+sqlite> .headers on
+sqlite> select count(), state from employees group by state;
+count()|state
+1|AL
+1|AZ
+1|CA
+1|CO
+6|CT
+...
+~~~
+
+We selected count() and state, otherwise we'd just see the counts by state
+without knowing which state the count referred to.  When we group a query,
+we're instructing the db to partition the data a certain way.
+
+The `count()` function isn't the only function we can use in a query:
+
+~~~
+sqlite> select state, max(hourly_rate), min(hourly_rate), avg(hourly_rate)
+   ...> from employees
+   ...> group by state;
+state|max(hourly_rate)|min(hourly_rate)|avg(hourly_rate)
+AL|55.0|55.0|55.0
+AZ|55.0|55.0|55.0
+CA|55.0|55.0|55.0
+CO|55.0|55.0|55.0
+CT|58.2|26.0|46.2833333333333
+FL|57.0|57.0|57.0
+...
+~~~
+
+Because this query was getting a little long, we broke it up over multiple
+lines. Until you add the semicolon, you're still composing your query. In
+practice, a complex query can be hundreds of lines long.
+
+Using the included functions is useful, but sometimes you just want data by
+itself. Let's see the names of the employees in CT, and their rates of pay.
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> where state = 'CT';
+first_name|last_name|hourly_rate
+Lisa|Galia|31.4
+Leonara|Lindsay|26.0
+Donald|Favis|58.2
+Ann|Daniele|54.1
+Joe|South|53.0
+Maruk|Fraval|55.0
+~~~
+
+In this case, we're looking for three specific column values for records in the
+`employees` table, if and only if the `state` column is 'CT'. If we only wanted
+employees in Connecticut whose hourly rate was above $50/hour, we could specify
+that:
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> where state = 'CT' and hourly_rate > 50.0;
+first_name|last_name|hourly_rate
+Donald|Favis|58.2
+Ann|Daniele|54.1
+Joe|South|53.0
+Maruk|Fraval|55.0
+~~~
+
+In addition to selecting particular fields and deciding on which records using
+`where`, we can also order the results we get back by a column or columns. We do
+this with the `order by` directive in the options clause.  First, let's order it
+by last name, alphabetically:
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> where state = 'CT' and hourly_rate > 50.0
+   ...> order by last_name;
+first_name|last_name|hourly_rate
+Ann|Daniele|54.1
+Donald|Favis|58.2
+Maruk|Fraval|55.0
+Joe|South|53.0
+~~~
+
+The `order by` clause instructs SQL to return the result set sorted. The default
+is 'ascending' order, but we can also specify descending order:
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> where state = 'CT' and hourly_rate > 50.0
+   ...> order by last_name desc;
+first_name|last_name|hourly_rate
+Joe|South|53.0
+Maruk|Fraval|55.0
+Donald|Favis|58.2
+Ann|Daniele|54.1
+~~~
+
+Limiting the size of the result set to a set number is also possible, and
+sometimes useful. Let's suppose we want to find the three highest paid people
+in the table:
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> order by hourly_rate desc
+   ...> limit 3;
+first_name|last_name|hourly_rate
+Janet|King|80.0
+Jennifer|Zamora|65.0
+Jason|Foss|65.0
+~~~
+
+By specifying a limit, we can control how many records we see. We can also
+specify an `offset`, telling SQL to skip a certain number of records when
+returning results. In the last query, we got the three highest paid people in
+the `employees` table. If we wanted the _next_ three, we'd do something like
+this:
+
+~~~
+sqlite> select first_name, last_name, hourly_rate
+   ...> from employees
+   ...> order by hourly_rate desc
+   ...> limit 3 offset 3;
+first_name|last_name|hourly_rate
+Eric|Dougall|64.0
+Peter|Monroe|63.0
+Simon|Roup|62.0
+~~~
+
+We'd use something like this if we were displaying a set of results one
+page at a time, with say 20 entries per page. The first page would be
+limit 10 offset (0 * 10), the second page limit 10 offset (1 * 10), and
+so on.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
