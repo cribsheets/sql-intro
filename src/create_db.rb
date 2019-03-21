@@ -38,10 +38,16 @@ db_file  = File.join(File.dirname(__FILE__), '..', 'employees.db')
 # read in the csv data, and clean
 employees = CSV.read(csv_file).map { |r| Hash[field_names.zip(r)] }
 employees.each do |e|
-  lname, fname = e[:name].split(/\s*,\s*/)
-  e[:first_name] = fname
-  e[:last_name] = lname
-  e.each { |k,v| e[k] = v.strip if v }
+  begin
+    lname, fname = e[:name].split(/\s*,\s*/)
+    e[:first_name] = fname.strip
+    e[:last_name] = lname.strip
+    e.each { |k,v| e[k] = v.strip if v }
+    e[:name] = "#{fname} #{lname}"
+  rescue
+    require 'pp'
+    pp e
+  end
 end
 
 print("creating new employees.db...")
