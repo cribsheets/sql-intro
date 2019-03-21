@@ -24,12 +24,19 @@ field_names = %i[
 insert_sql = <<-SQL
   insert into employees values (
     "%{name}", "%{first_name}", "%{last_name}", %{empno}, '%{state}',
-    '%{zip}', %{dob}, %{age}, '%{sex}', '%{marital_status}',
-    '%{citizenship}', %{hire_date}, %{termination_date}, '%{term_reason}', '%{status}',
+    '%{zip}', date('%{dob}'), %{age}, '%{sex}', '%{marital_status}',
+    '%{citizenship}', date('%{hire_date}'), date('%{termination_date}'), '%{term_reason}', '%{status}',
     '%{department}', '%{position}', %{hourly_rate}, '%{manager}', '%{source}',
     '%{performance_score}'
   );
 SQL
+
+# turn the date into something sql can
+# deal with
+def sqlify_date(raw_date)
+    m, d, y = raw_date.split('/')
+    "%04d-%02d-%02d" % [y, m, d]
+end
 
 # files
 csv_file = File.join(File.dirname(__FILE__), '..', 'data', 'employees.csv')
@@ -39,16 +46,26 @@ db_file  = File.join(File.dirname(__FILE__), '..', 'employees.db')
 employees = CSV.read(csv_file).map { |r| Hash[field_names.zip(r)] }
 employees.each do |e|
   begin
-    lname, fname = e[:name].split(/\s*,\s*/)
-    e[:first_name] = fname.strip
-    e[:last_name] = lname.strip
+    lname, fname = e[:name].split(/\s*,\s*/).map(&:strip)
+    e[:first_name] = fname
+    e[:last_name] = lname
     e.each { |k,v| e[k] = v.strip if v }
     e[:name] = "#{fname} #{lname}"
-  rescue
+
+    # convert date to something sane
+    e[:dob] = sqlify_date(e[:dob])
+    e[:hire_date] = sqlify_date(e[:hire_date])
+    if e[:termination_date].downcase != "null"
+      e[:termination_date] = sqlify_date(e[:termination_date])
+    end
+  rescue => ex
     require 'pp'
     pp e
+    pp ex
   end
 end
+
+
 
 print("creating new employees.db...")
 db = SQLite3::Database.new(db_file)
