@@ -471,7 +471,7 @@ a page at a time, given `order by`, `limit`, and `offset`.
 One last thing we can do with select that's very useful is to find only unique
 entries in the data. Let's review the schema of the employees table:
 
-~~~sql
+```sql
 sqlite> .schema employees
 CREATE TABLE employees (
     name TEXT, first_name TEXT, last_name TEXT, empno TEXT, state TEXT,
@@ -482,7 +482,7 @@ status TEXT,
 TEXT,
     performance_score TEXT
   );
-~~~
+```
 
 Each record in the table applies to a particular employee, however there are
 some columns that are likely duplicate data. For instance, 'status' is very
