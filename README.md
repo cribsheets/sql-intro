@@ -34,6 +34,13 @@ SQL's table/record structure and a spreadsheet's sheet/row structure. This is
 okay to use as a model for initial understanding, but don't get _too_ attached
 to that model.
 
+While the core features of the SQL language are uniform across relational database
+management systems (RDBMS), it's worth noting that as you approach the edges of
+the core language, different databases may use slightly different SQL dialects.
+Don't worry too much about this right now, but when you begin work in a
+database, be sure and look through it's SQL notes for deviation from what you
+expect.
+
 # SQLite
 
 To keep the overhead for these exercises as small as possible, we'll be using
@@ -242,6 +249,8 @@ load that into SQLite. From the project directory (where this README is), run:
 > sqlite3 employees.db
 ~~~
 
+### Explore the Data
+
 Now let's poke around. The first thing you'll want to do when opening a new data
 set is to check out its structure. Remember that `.help` exists, and let's see
 what databases are present.
@@ -280,9 +289,14 @@ Each field has a _datatype_.
 
 In this table, most columns are TEXT, but a few are DATEs, with
 an INTEGER and FLOAT thrown in for variety. Now that we know what fields are
-available, it would be nice to know how many records are in the table.
+available, let's start looking at the data itself.
 
-We do this with `select` and `count()`:
+### Counting Things
+
+The first thing we want to know is how many records are in the table. This gives
+us a sense of scale. This is very small data set, but future data you encounter
+could be quite large. We can count the number of records using `select` and
+`count()`:
 
 ~~~
 sqlite> select count() from employees;
@@ -304,11 +318,14 @@ count()
 ~~~
 
 We could do this for every state, but it's also possible to see everything
-at once. The `count()` function can also be combined with the `group by`
+at once. To group things together, we use `group by` in the options clause.
+
+### Grouping Things
+
+The `count()` function can be combined with the `group by`
 options to get a count by state for all states:
 
 ~~~
-sqlite> .headers on
 sqlite> select count(), state from employees group by state;
 count()|state
 1|AL
@@ -343,6 +360,8 @@ Because this query was getting a little long, we broke it up over multiple
 lines. Until you add the semicolon, you're still composing your query. In
 practice, a complex query can be hundreds of lines long.
 
+### Selecting Data By Column
+
 Using the included functions is useful, but sometimes you just want data by
 itself. Let's see the names of the employees in CT, and their rates of pay.
 
@@ -375,6 +394,8 @@ Joe|South|53.0
 Maruk|Fraval|55.0
 ~~~
 
+### Sorting Results
+
 In addition to selecting particular fields and deciding on which records using
 `where`, we can also order the results we get back by a column or columns. We do
 this with the `order by` directive in the options clause.  First, let's order it
@@ -406,6 +427,8 @@ Maruk|Fraval|55.0
 Donald|Favis|58.2
 Ann|Daniele|54.1
 ~~~
+
+### Limiting the Result Set and Skipping Results
 
 Limiting the size of the result set to a set number is also possible, and
 sometimes useful. Let's suppose we want to find the three highest paid people
@@ -442,8 +465,53 @@ Simon|Roup|62.0
 We'd use something like this if we were displaying a set of results one
 page at a time, with say 20 entries per page. The first page would be
 limit 10 offset (0 * 10), the second page limit 10 offset (1 * 10), and
-so on.
+so on. It's straightforward to see how you might write a program to extract data
+a page at a time, given `order by`, `limit`, and `offset`.
 
+One last thing we can do with select that's very useful is to find only unique
+entries in the data. Let's review the schema of the employees table:
+
+~~~sql
+sqlite> .schema employees
+CREATE TABLE employees (
+    name TEXT, first_name TEXT, last_name TEXT, empno TEXT, state TEXT,
+    zip TEXT, dob DATE, age INTEGER, sex TEXT, marital_status TEXT,
+    citizenship TEXT, hire_date DATE, termination_date DATE, term_reason TEXT,
+status TEXT,
+    department TEXT, position TEXT, hourly_rate FLOAT, manager TEXT, source
+TEXT,
+    performance_score TEXT
+  );
+~~~
+
+Each record in the table applies to a particular employee, however there are
+some columns that are likely duplicate data. For instance, 'status' is very
+likely one of a few options, rather than custom text for each employees.
+Similarly, 'department', 'manager', 'position', and 'citizenship' likely have a
+handful of data entries across all employees, rather than a unique entry for
+each employee.
+
+We can check this by asking sql to return values that are unique, or `distinct`.
+Let's find all the possible employee statuses in the the current data set. We'll
+use `select distinct status` to indicate that we only want to see each entry
+once:
+
+~~~
+sqlite> select distinct status from employees;
+Active
+Voluntarily Terminated
+Terminated for Cause
+Leave of Absence
+Future Start
+~~~
+
+So, out of 301 records, there are only five distinct statuses that apply to
+employees. Experienced developers will recognize this as a problem, caused
+by importing data into this database from a merged csv; we _could_ extract
+these status fields into another table to dry up our data, but that's
+another show.
+
+-----------
 
 
 
